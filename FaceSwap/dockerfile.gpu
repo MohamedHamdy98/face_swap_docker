@@ -1,4 +1,4 @@
-# Use the NVIDIA CUDA base image with Python 3.10
+# Use the NVIDIA CUDA base image with Python 3.9
 FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
 
 # Set the working directory
@@ -10,8 +10,11 @@ COPY FaceSwap/requirements.txt ./
 # Set the environment variable to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Python 3.10 and system dependencies
+# Add the deadsnakes PPA to install Python 3.10 and install Python 3.10 along with system dependencies
 RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
     apt-get install -y \
     python3.10 \
     python3.10-dev \
