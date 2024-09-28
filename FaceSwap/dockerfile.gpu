@@ -16,7 +16,7 @@ RUN apt-get update && \
     apt-get install -y \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
-    python${PYTHON_VERSION}-pip \
+    python3-pip \
     build-essential \
     ffmpeg \
     git \
@@ -29,8 +29,8 @@ RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
     echo "Symbolic link created."
 
 # Upgrade pip and install Python packages with cleanup
-RUN pip3 install --upgrade pip && \
-    pip3 install -r requirements.txt && \
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install -r requirements.txt && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
