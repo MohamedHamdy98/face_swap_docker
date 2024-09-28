@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file dockerfile.gpu --tag face-swap-fastapi-image:$(date +%s)
+      run: docker build . --file FaceSwap/dockerfile.gpu --tag face-swap-fastapi-image:$(date +%s)
