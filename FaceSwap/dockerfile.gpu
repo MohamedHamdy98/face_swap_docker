@@ -24,13 +24,12 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/* \
     && echo "Python installation completed."
 
-# Verify Python installation and create symbolic link
-RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
-    echo "Symbolic link created."
+# Check if pip is installed, and if not, install it
+RUN python3 -m ensurepip || true && \
+    python3 -m pip install --upgrade pip
 
 # Upgrade pip and install Python packages with cleanup
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install -r requirements.txt && \
+RUN python3 -m pip install -r requirements.txt && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
