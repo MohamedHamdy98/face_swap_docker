@@ -20,7 +20,8 @@ RUN apt-get update && \
     ffmpeg \
     git \
     tzdata \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && echo "Python installation completed."
 
 # Verify Python installation and create symbolic link
 RUN if [ -e /usr/bin/python3.9 ]; then \
@@ -31,9 +32,11 @@ RUN if [ -e /usr/bin/python3.9 ]; then \
         exit 1; \
     fi
 
-# Install Python packages
+# Upgrade pip and install Python packages with cleanup
 RUN pip3 install --upgrade pip && \
-    pip3 install -r requirements.txt
+    pip3 install -r requirements.txt && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy the application code
 COPY . /app
