@@ -1,4 +1,5 @@
-# Use the NVIDIA CUDA base image with Python 3.9
+# Use the NVIDIA CUDA base image
+ARG PYTHON_VERSION=3.9
 FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
 
 # Set the working directory
@@ -10,31 +11,22 @@ COPY FaceSwap/requirements.txt ./
 # Set the environment variable to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Add the deadsnakes PPA to install Python 3.10 and install Python 3.10 along with system dependencies
+# Install Python and system dependencies
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
     apt-get install -y \
-    python3.10 \
-    python3.10-dev \
-    python3.10-distutils \
-    python3-pip \
+    python${PYTHON_VERSION} \
+    python${PYTHON_VERSION}-dev \
+    python${PYTHON_VERSION}-pip \
     build-essential \
     ffmpeg \
     git \
     tzdata \
     && rm -rf /var/lib/apt/lists/* \
-    && echo "Python 3.10 installation completed."
+    && echo "Python installation completed."
 
 # Verify Python installation and create symbolic link
-RUN if [ -e /usr/bin/python3.10 ]; then \
-        ln -sf /usr/bin/python3.10 /usr/bin/python3 && \
-        echo "Symbolic link created."; \
-    else \
-        echo "Python 3.10 installation failed"; \
-        exit 1; \
-    fi
+RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
+    echo "Symbolic link created."
 
 # Upgrade pip and install Python packages with cleanup
 RUN pip3 install --upgrade pip && \
