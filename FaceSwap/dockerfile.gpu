@@ -1,4 +1,4 @@
-# Use the NVIDIA CUDA base image with Python 3.9
+# Use the NVIDIA CUDA base image with Python 3.10
 FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
 
 # Set the working directory
@@ -10,25 +10,25 @@ COPY FaceSwap/requirements.txt ./
 # Set the environment variable to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Python and system dependencies
+# Install Python 3.10 and system dependencies
 RUN apt-get update && \
     apt-get install -y \
-    python3.9 \
-    python3.9-dev \
+    python3.10 \
+    python3.10-dev \
     python3-pip \
     build-essential \
     ffmpeg \
     git \
     tzdata \
     && rm -rf /var/lib/apt/lists/* \
-    && echo "Python installation completed."
+    && echo "Python 3.10 installation completed."
 
 # Verify Python installation and create symbolic link
-RUN if [ -e /usr/bin/python3.9 ]; then \
-        ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
+RUN if [ -e /usr/bin/python3.10 ]; then \
+        ln -sf /usr/bin/python3.10 /usr/bin/python3 && \
         echo "Symbolic link created."; \
     else \
-        echo "Python 3.9 installation failed"; \
+        echo "Python 3.10 installation failed"; \
         exit 1; \
     fi
 
