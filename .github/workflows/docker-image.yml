@@ -14,5 +14,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: Set up Docker image tag
+      run: echo "IMAGE_TAG=mohammedhamdy98/face-swap-fastapi-docker:$(date +%s)" >> $GITHUB_ENV
+      
     - name: Build the Docker image
-      run: docker build . --file FaceSwap/dockerfile.gpu --tag face-swap-fastapi-image:$(date +%s)
+      run: docker build . --file FaceSwap/dockerfile.gpu --tag ${{ env.IMAGE_TAG }}
+      
+    - name: Push the Docker image
+      run: docker push ${{ env.IMAGE_TAG }}
