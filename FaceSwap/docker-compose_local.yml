@@ -1,0 +1,26 @@
+version: '3.10'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile.gpu
+    image: face_swap_gpu_docker_api:latest
+    volumes:
+      - .:/app
+      - $HOME/.cache/pip:/root/.cache/pip
+    ports:
+      - "5001:5001"
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: production 
+    runtime: nvidia  # Enable GPU runtime
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1  # Number of GPUs to reserve
+              capabilities: [gpu]
+    command: gunicorn --bind 0.0.0.0:5001 app:app
+

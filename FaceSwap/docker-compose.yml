@@ -1,0 +1,11 @@
+version: '3.10'  
+
+services:
+  fastapi:
+    build:
+      context: .  # Context is the current directory
+      dockerfile: dockerfile.gpu  # Specify your Dockerfile name
+    ports:
+      - "8000:8000"  # Map port 8000 of the container to port 5000 on the host
+    environment:
+      - ENV_VAR_NAME=value  # Add any environment variables your app needs

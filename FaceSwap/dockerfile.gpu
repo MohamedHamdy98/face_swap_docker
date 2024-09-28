@@ -1,0 +1,36 @@
+# Use the NVIDIA CUDA base image with Python 3.9
+FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
+
+# Set the working directory
+WORKDIR /app
+
+# Copy only the requirements file first to leverage Docker cache
+COPY requirements.txt .
+
+# Install Python and system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    python3.9 \
+    python3.9-dev \
+    python3-pip \
+    build-essential \
+    --no-install-recommends -y ffmpeg \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a symlink for python3 to python
+RUN ln -s /usr/bin/python3.9 /usr/bin/python3
+
+# Install Python packages
+
+RUN pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt
+
+# Copy the application code
+COPY . /app
+
+# Expose the port FastAPI will run on
+EXPOSE 5000
+
+# Command to run the FastAPI application
+CMD ["uvicorn", "app_fast:app", "--host", "0.0.0.0", "--port", "5000"]
