@@ -22,9 +22,10 @@ RUN apt-get update && \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-# Check if Python 3.9 is installed correctly
-RUN if [ -f /usr/bin/python3.9 ]; then \
-        ln -s /usr/bin/python3.9 /usr/bin/python3; \
+# Verify Python installation and create symbolic link
+RUN if [ -e /usr/bin/python3.9 ]; then \
+        ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
+        echo "Symbolic link created."; \
     else \
         echo "Python 3.9 installation failed"; \
         exit 1; \
