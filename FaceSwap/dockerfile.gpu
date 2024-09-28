@@ -5,31 +5,37 @@ FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
 WORKDIR /app
 
 # Copy only the requirements file first to leverage Docker cache
-COPY FaceSwap/requirements.txt ./
+COPY requirements.txt ./
 
 # Set the environment variable to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Python and system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y \
     python3.9 \
+    python3.9-dev \
     python3-pip \
     build-essential \
     ffmpeg \
-    git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    git \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create a symlink for python3 to python
-RUN ln -s /usr/bin/python3.9 /usr/bin/python3
+# Check if Python 3.9 is installed correctly
+RUN if [ -f /usr/bin/python3.9 ]; then \
+        ln -s /usr/bin/python3.9 /usr/bin/python3; \
+    else \
+        echo "Python 3.9 installation failed"; \
+        exit 1; \
+    fi
 
 # Install Python packages
 RUN pip3 install --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
+    pip3 install -r requirements.txt
 
 # Copy the application code
-COPY . .
+COPY . /app
 
 # Expose the port FastAPI will run on
 EXPOSE 5000
