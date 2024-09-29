@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from tqdm import tqdm  
 import uvicorn
 from model_download import setup_environment
+from PIL import Image
+from pathlib import Path
 
 app = FastAPI()
 
@@ -23,7 +25,39 @@ app.add_middleware(
 
 setup_environment()
 
+class FaceSwapRequest(BaseModel):
+    target_url: str
+    source_url: str
+
 # Helper function to download a file from Google Drive
+"""def download_from_google_drive(url: str, output_path: str):
+    try:
+        # Extract the file ID from the Google Drive URL
+        file_id = url.split("/d/")[1].split("/view")[0]
+        download_url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(download_url, output_path, quiet=False)
+        print(f"File downloaded successfully to {output_path}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to download file from {url}. Error: {str(e)}")"""
+
+def convert_to_jpg(image_path):
+    # Open the image to check its format and convert if necessary
+    img = Image.open(image_path)
+    original_format = img.format
+    original_extension = Path(image_path).suffix
+    print(f"Original image format: {original_format}")
+    
+    if img.format != 'JPEG':
+        # Define the new path with a .jpg extension
+        output_jpg_path = Path(image_path).with_suffix('.jpg')
+        rgb_img = img.convert("RGB")  # Convert to RGB for JPG format
+        rgb_img.save(output_jpg_path, format="JPEG")
+        print(f"Image converted to JPG and saved as: {output_jpg_path}")
+        print(f"New file extension: {output_jpg_path.suffix}")
+    else:
+        print(f"Image is already in JPG format: {image_path}")
+        print(f"File extension remains: {original_extension}")
+
 def download_from_google_drive(url: str, output_path: str):
     """
     Downloads a file from Google Drive using its URL and saves it to the specified output path.
@@ -36,14 +70,17 @@ def download_from_google_drive(url: str, output_path: str):
         # Extract the file ID from the Google Drive URL
         file_id = url.split("/d/")[1].split("/view")[0]
         download_url = f"https://drive.google.com/uc?id={file_id}"
+        
+        # Download the file to the specified path
         gdown.download(download_url, output_path, quiet=False)
         print(f"File downloaded successfully to {output_path}")
+        
+        # Convert the image to JPG if it's not already in that format
+        convert_to_jpg(output_path)
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to download file from {url}. Error: {str(e)}")
-
-class FaceSwapRequest(BaseModel):
-    target_url: str
-    source_url: str
+    
 
 @app.post('/face_swap')
 async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
@@ -64,11 +101,12 @@ async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
         # Retrieve URLs from the request
         target_url = target_url
         source_url = source_url
-        output_path = '/tmp/uploaded_data/outputs/output_face_swap.mp4'  # Default output path
+        output_path = '/face_swap_data/outputs/output_face_swap.mp4'  # Default output path
+
 
         # Define paths to save the downloaded files
-        target_path = "/tmp/uploaded_data/videos/target_video.mp4"
-        source_path = "/tmp/uploaded_data/images/source_image.jpg"
+        target_path = "/face_swap_data/data_from_user/videos/target_video.mp4"
+        source_path = "/face_swap_data/data_from_user/images/source_image.jpg"
 
         # Ensure directories exist
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
@@ -99,6 +137,8 @@ async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
         return JSONResponse(content={
             'status': 'success',
             'message': 'Face swapping completed',
+            'video_input': target_path,
+            'image_input': source_path,
             'output_path': output_path
         })
 
@@ -117,7 +157,7 @@ async def get_path_face_swap():
     """
     try:
         # Path to the output video from the face swap
-        output_path = '/tmp/uploaded_data/outputs/output_face_swap.mp4'
+        output_path = '/face_swap_data/outputs/output_face_swap.mp4'
 
         # Check if the output file exists
         if os.path.exists(output_path):
@@ -146,7 +186,7 @@ async def index():
 
 def main():
     # Run the FastAPI application with uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=5000)
 
 if __name__ == "__main__":
      main()
