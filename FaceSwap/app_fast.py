@@ -8,6 +8,7 @@ import gdown
 from fastapi.middleware.cors import CORSMiddleware
 from tqdm import tqdm  
 import uvicorn
+from model_download import setup_environment
 
 app = FastAPI()
 
@@ -19,6 +20,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+setup_environment()
 
 # Helper function to download a file from Google Drive
 def download_from_google_drive(url: str, output_path: str):
