@@ -11,6 +11,7 @@ import uvicorn
 from model_download import setup_environment
 from PIL import Image
 from pathlib import Path
+from typing import Optional
 
 app = FastAPI()
 
@@ -26,8 +27,19 @@ app.add_middleware(
 setup_environment()
 
 class FaceSwapRequest(BaseModel):
-    target_url: str
-    source_url: str
+    target_url: Optional[str] = None
+    source_url: Optional[str] = None
+    
+async def form_or_json(target_url: Optional[str] = Form(None), source_url: Optional[str] = Form(None), request: FaceSwapRequest = Depends()):
+    # Check if form data is provided, otherwise fall back to JSON
+    if not target_url or not source_url:
+        target_url = request.target_url
+        source_url = request.source_url
+
+    if not target_url or not source_url:
+        raise HTTPException(status_code=422, detail="Both target_url and source_url are required")
+
+    return target_url, source_url
 
 # Helper function to download a file from Google Drive
 """def download_from_google_drive(url: str, output_path: str):
@@ -83,7 +95,7 @@ def download_from_google_drive(url: str, output_path: str):
     
 
 @app.post('/face_swap')
-async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
+async def face_swap(data: tuple = Depends(form_or_json)):
     """
     Endpoint for performing face swapping using provided Google Drive links for the target video and source image.
 
@@ -99,8 +111,7 @@ async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
         # os.chdir("roop")  # Set to the directory where your Roop files are located
 
         # Retrieve URLs from the request
-        target_url = target_url
-        source_url = source_url
+        target_url, source_url = data
         output_path = '/face_swap_data/outputs/output_face_swap.mp4'  # Default output path
 
 
@@ -121,8 +132,8 @@ async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
 
         # Prepare and run the face swapping command
         print("Performing face swapping...")
-        # os.chdir("roop")
-        os.chdir("H:\\avatar_veem\\Edit_Coding\\bf_docker\\FaceSwap\\roop")
+        os.chdir("roop")
+        # os.chdir("H:\\avatar_veem\\Edit_Coding\\bf_docker\\FaceSwap\\roop")
         command = f"python run.py --target {target_path} --source {source_path} -o {output_path} --execution-provider cuda --frame-processor face_swapper"
 
         # Mock progress bar since subprocess is blocking
@@ -150,13 +161,15 @@ async def face_swap(target_url: str = Form(...), source_url: str = Form(...)):
 @app.get('/get_path_face_swap')
 async def get_path_face_swap():
     """
-    Endpoint to retrieve the path of the output file from the face swap operation.
+    Endpoint to retrieve the paths of the target video, source image, and the output file from the face swap operation.
 
     Returns:
-        JSON response with the status and the path to the output file, if it exists.
+        JSON response with the status and the paths to the video input, image input, and output file, if they exist.
     """
     try:
-        # Path to the output video from the face swap
+        # Define the paths for the target video, source image, and output file
+        target_path = "/face_swap_data/data_from_user/videos/target_video.mp4"
+        source_path = "/face_swap_data/data_from_user/images/source_image.jpg"
         output_path = '/face_swap_data/outputs/output_face_swap.mp4'
 
         # Check if the output file exists
@@ -164,13 +177,13 @@ async def get_path_face_swap():
             return JSONResponse(content={
                 'status': 'success',
                 'message': 'Output file path retrieved successfully',
+                'video_input': target_path,
+                'image_input': source_path,
                 'output_path': output_path
             })
         else:
             raise HTTPException(status_code=404, detail='Output file not found')
 
-    except HTTPException as e:
-        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
