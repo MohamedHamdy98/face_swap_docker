@@ -112,17 +112,17 @@ async def face_swap(data: tuple = Depends(form_or_json)):
 
         # Retrieve URLs from the request
         target_url, source_url = data
-        output_path = '/face_swap_data/outputs/output_face_swap.mp4'  # Default output path
+        output_path = Path('/face_swap_data/outputs/output_face_swap.mp4')  # Default output path
 
 
         # Define paths to save the downloaded files
-        target_path = "/face_swap_data/data_from_user/videos/target_video.mp4"
-        source_path = "/face_swap_data/data_from_user/images/source_image.jpg"
+        target_path = Path("/face_swap_data/data_from_user/videos/target_video.mp4")
+        source_path = Path("/face_swap_data/data_from_user/images/source_image.jpg")
 
         # Ensure directories exist
-        os.makedirs(os.path.dirname(target_path), exist_ok=True)
-        os.makedirs(os.path.dirname(source_path), exist_ok=True)
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Download the files from Google Drive with progress reporting
         print("Downloading target video...")
@@ -168,9 +168,9 @@ async def get_path_face_swap():
     """
     try:
         # Define the paths for the target video, source image, and output file
-        target_path = "/face_swap_data/data_from_user/videos/target_video.mp4"
-        source_path = "/face_swap_data/data_from_user/images/source_image.jpg"
-        output_path = '/face_swap_data/outputs/output_face_swap.mp4'
+        target_path = Path("/face_swap_data/data_from_user/videos/target_video.mp4")
+        source_path = Path("/face_swap_data/data_from_user/images/source_image.jpg")
+        output_path = Path('/face_swap_data/outputs/output_face_swap.mp4')
 
         # Check if the output file exists
         if os.path.exists(output_path):
