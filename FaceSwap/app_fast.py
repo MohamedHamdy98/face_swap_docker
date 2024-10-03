@@ -148,9 +148,9 @@ async def face_swap(data: tuple = Depends(form_or_json)):
         return JSONResponse(content={
             'status': 'success',
             'message': 'Face swapping completed',
-            'video_input': target_path,
-            'image_input': source_path,
-            'output_path': output_path
+            'video_input': str(target_path),
+            'image_input': str(source_path),
+            'output_path': str(output_path)
         })
 
     except HTTPException as e:
@@ -173,13 +173,13 @@ async def get_path_face_swap():
         output_path = Path('/face_swap_data/outputs/output_face_swap.mp4')
 
         # Check if the output file exists
-        if os.path.exists(output_path):
+        if output_path.exists():
             return JSONResponse(content={
                 'status': 'success',
                 'message': 'Output file path retrieved successfully',
-                'video_input': target_path,
-                'image_input': source_path,
-                'output_path': output_path
+                'video_input': str(target_path),
+                'image_input': str(source_path),
+                'output_path': str(output_path)
             })
         else:
             raise HTTPException(status_code=404, detail='Output file not found')
